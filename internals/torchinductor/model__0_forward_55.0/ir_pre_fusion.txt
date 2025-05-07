@@ -1,0 +1,113 @@
+buf0: SchedulerNode(ComputedBuffer)
+buf0.writes = [MemoryDep('buf0', c0, {c0: 32768})]
+buf0.unmet_dependencies = []
+buf0.met_dependencies = [MemoryDep('primals_1', c0, {c0: 4202692608})]
+buf0.users = [NodeUser(node=SchedulerNode(name='buf1'), can_inplace=True, is_weak=False), NodeUser(node=SchedulerNode(name='buf2'), can_inplace=False, is_weak=False)]
+buf0.group.device = cuda:0
+buf0.group.iteration = (32768, 128256)
+buf0.sizes = ([32768], [128256])
+class buf0_loop_body:
+    var_ranges = {z0: 32768, z1: 128256}
+    index0 = 128256*z0 + z1
+    index1 = z0
+    def body(self, ops):
+        get_index = self.get_index('index0')
+        load = ops.load('primals_1', get_index)
+        to_dtype = ops.to_dtype(load, torch.float32)
+        reduction = ops.reduction(torch.float32, torch.float32, 'max', to_dtype)
+        get_index_1 = self.get_index('index1')
+        store_reduction = ops.store_reduction('buf0', get_index_1, reduction)
+        return store_reduction
+
+
+buf1: SchedulerNode(ComputedBuffer)
+buf1.writes = [MemoryDep('buf1', c0, {c0: 32768})]
+buf1.unmet_dependencies = [MemoryDep('buf0', c0, {c0: 32768})]
+buf1.met_dependencies = [MemoryDep('primals_1', c0, {c0: 4202692608})]
+buf1.users = [NodeUser(node=SchedulerNode(name='buf2'), can_inplace=False, is_weak=False)]
+buf1.group.device = cuda:0
+buf1.group.iteration = (32768, 128256)
+buf1.sizes = ([32768], [128256])
+class buf1_loop_body:
+    var_ranges = {z0: 32768, z1: 128256}
+    index0 = 128256*z0 + z1
+    index1 = z0
+    def body(self, ops):
+        get_index = self.get_index('index0')
+        load = ops.load('primals_1', get_index)
+        to_dtype = ops.to_dtype(load, torch.float32)
+        get_index_1 = self.get_index('index1')
+        load_1 = ops.load('buf0', get_index_1)
+        sub = ops.sub(to_dtype, load_1)
+        exp = ops.exp(sub)
+        reduction = ops.reduction(torch.float32, torch.float32, 'sum', exp)
+        get_index_2 = self.get_index('index1')
+        store_reduction = ops.store_reduction('buf1', get_index_2, reduction)
+        return store_reduction
+
+
+buf2: SchedulerNode(ComputedBuffer)
+buf2.writes = [MemoryDep('buf2', c0, {c0: 4202692608})]
+buf2.unmet_dependencies = [MemoryDep('buf0', c0, {c0: 32768}), MemoryDep('buf1', c0, {c0: 32768})]
+buf2.met_dependencies = [MemoryDep('primals_1', c0, {c0: 4202692608})]
+buf2.users = [NodeUser(node=SchedulerNode(name='buf3'), can_inplace=False, is_weak=False), NodeUser(node=OUTPUT, can_inplace=False, is_weak=False)]
+buf2.group.device = cuda:0
+buf2.group.iteration = (4202692608, 1)
+buf2.sizes = ([32768, 128256], [])
+class buf2_loop_body:
+    var_ranges = {z0: 32768, z1: 128256}
+    index0 = 128256*z0 + z1
+    index1 = z0
+    def body(self, ops):
+        get_index = self.get_index('index0')
+        load = ops.load('primals_1', get_index)
+        to_dtype = ops.to_dtype(load, torch.float32)
+        get_index_1 = self.get_index('index1')
+        load_1 = ops.load('buf0', get_index_1)
+        sub = ops.sub(to_dtype, load_1)
+        get_index_2 = self.get_index('index1')
+        load_2 = ops.load('buf1', get_index_2)
+        log = ops.log(load_2)
+        sub_1 = ops.sub(sub, log)
+        to_dtype_1 = ops.to_dtype(sub_1, torch.bfloat16)
+        get_index_3 = self.get_index('index0')
+        store = ops.store('buf2', get_index_3, to_dtype_1, None)
+        return store
+
+
+buf3: SchedulerNode(ComputedBuffer)
+buf3.writes = [MemoryDep('buf3', c0, {c0: 32768})]
+buf3.unmet_dependencies = [MemoryDep('buf2', (tmp8) + 128256*c0, {c0: 32768})]
+buf3.met_dependencies = [MemoryDep('primals_2', c0, {c0: 32768})]
+buf3.users = [NodeUser(node=OUTPUT, can_inplace=False, is_weak=False)]
+buf3.group.device = cuda:0
+buf3.group.iteration = (32768, 1)
+buf3.sizes = ([32768], [])
+class buf3_loop_body:
+    var_ranges = {z0: 32768}
+    index0 = z0
+    index1 = indirect0 + 128256*z0
+    def body(self, ops):
+        get_index = self.get_index('index0')
+        load = ops.load('primals_2', get_index)
+        constant = ops.constant(-100, torch.int64)
+        ne = ops.ne(load, constant)
+        get_index_1 = self.get_index('index0')
+        load_1 = ops.load('primals_2', get_index_1)
+        constant_1 = ops.constant(-100, torch.int64)
+        ne_1 = ops.ne(load_1, constant_1)
+        get_index_2 = self.get_index('index0')
+        load_2 = ops.load('primals_2', get_index_2)
+        constant_2 = ops.constant(0, torch.int64)
+        where = ops.where(ne_1, load_2, constant_2)
+        set_indirect0 = self.set_indirect0(where)
+        get_index_3 = self.get_index('index1')
+        load_3 = ops.load('buf2', get_index_3)
+        neg = ops.neg(load_3)
+        constant_3 = ops.constant(0.0, torch.bfloat16)
+        where_1 = ops.where(ne, neg, constant_3)
+        get_index_4 = self.get_index('index0')
+        store = ops.store('buf3', get_index_4, where_1, None)
+        return store
+
+

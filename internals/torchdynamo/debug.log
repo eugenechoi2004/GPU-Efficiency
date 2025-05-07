@@ -1,0 +1,144 @@
+Step 1: torchdynamo start tracing loss_fn /scratch/network/OPEN-CATALYST/bench_v0.py:27
+TRACE starts_line loss_fn /scratch/network/OPEN-CATALYST/bench_v0.py:27
+    def loss_fn(logits, targets):
+wrap_to_fake L['logits'] (32768, 128256) [<DimDynamic.DUCK: 1>, <DimDynamic.DUCK: 1>] [None, None]
+wrap_to_fake L['targets'] (32768,) [<DimDynamic.DUCK: 1>] [None]
+TRACE starts_line loss_fn /scratch/network/OPEN-CATALYST/bench_v0.py:28
+        return loss_module(logits, targets)
+TRACE LOAD_GLOBAL loss_module []
+TRACE LOAD_FAST logits [NNModuleVariable()]
+TRACE LOAD_FAST targets [NNModuleVariable(), TensorVariable()]
+TRACE CALL_FUNCTION 2 [NNModuleVariable(), TensorVariable(), TensorVariable()]
+TRACE RETURN_VALUE None [TensorVariable()]
+Step 1: torchdynamo done tracing loss_fn (RETURN_VALUE)
+RETURN_VALUE triggered compile
+COMPILING GRAPH due to GraphCompileReason(reason='return_value', user_stack=[<FrameSummary file /scratch/network/OPEN-CATALYST/bench_v0.py, line 28 in loss_fn>], graph_break=False)
+TRACED GRAPH
+ ===== __compiled_fn_0 =====
+ <eval_with_key>.0 class GraphModule(torch.nn.Module):
+    def forward(self, L_logits_ : torch.Tensor, L_targets_ : torch.Tensor):
+        l_logits_ = L_logits_
+        l_targets_ = L_targets_
+        
+        # File: /scratch/network/OPEN-CATALYST/bench_v0.py:28, code: return loss_module(logits, targets)
+        loss_module = self.loss_module(l_logits_, l_targets_);  l_logits_ = l_targets_ = None
+        return (loss_module,)
+        
+
+TRACED GRAPH
+ __compiled_fn_0 <eval_with_key>.0 opcode       name         target       args                     kwargs
+-----------  -----------  -----------  -----------------------  --------
+placeholder  l_logits_    L_logits_    ()                       {}
+placeholder  l_targets_   L_targets_   ()                       {}
+call_module  loss_module  loss_module  (l_logits_, l_targets_)  {}
+output       output       output       ((loss_module,),)        {}
+
+TRACED GRAPH TENSOR SIZES
+===== __compiled_fn_0 =====
+l_logits_: (s0, s1)
+l_logits_ (concrete): (32768, 128256)
+l_targets_: (s0,)
+l_targets_ (concrete): (32768,)
+loss_module: (s0,)
+loss_module (concrete): (32768,)
+
+Step 2: calling compiler function dynamo_normalization_capturing_compiler
+Step 2: done compiler function dynamo_normalization_capturing_compiler
+GUARDS:
+___check_type_id(L['logits'], 86023936)                       # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+str(L['logits'].dtype) == 'torch.bfloat16'                    # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+str(L['logits'].device) == 'cuda:0'                           # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+L['logits'].requires_grad == True                             # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+L['logits'].ndimension() == 2                                 # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+hasattr(L['logits'], '_dynamo_dynamic_indices') == False      # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+str(L['logits'].dtype) == 'torch.bfloat16'                    # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+str(L['logits'].device) == 'cuda:0'                           # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+L['logits'].requires_grad == True                             # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+L['logits'].ndimension() == 2                                 # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+hasattr(L['logits'], '_dynamo_dynamic_indices') == False      # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+___check_type_id(L['targets'], 86023936)                      # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+str(L['targets'].dtype) == 'torch.int64'                      # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+str(L['targets'].device) == 'cuda:0'                          # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+L['targets'].requires_grad == False                           # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+L['targets'].ndimension() == 1                                # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+hasattr(L['targets'], '_dynamo_dynamic_indices') == False     # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+str(L['targets'].dtype) == 'torch.int64'                      # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+str(L['targets'].device) == 'cuda:0'                          # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+L['targets'].requires_grad == False                           # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+L['targets'].ndimension() == 1                                # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+hasattr(L['targets'], '_dynamo_dynamic_indices') == False     # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+___is_grad_enabled()                                          # _dynamo/output_graph.py:345 in init_ambient_guards
+not ___are_deterministic_algorithms_enabled()                 # _dynamo/output_graph.py:341 in init_ambient_guards
+___is_torch_function_enabled()                                # _dynamo/output_graph.py:349 in init_ambient_guards
+utils_device.CURRENT_DEVICE == None                           # _dynamo/output_graph.py:347 in init_ambient_guards
+___check_obj_id(G['loss_module'], 23393285283264)             # return loss_module(logits, targets)  # bench_v0.py:28 in loss_fn
+G['loss_module'].training == True                             # return loss_module(logits, targets)  # bench_v0.py:28 in loss_fn
+L['logits'].stride()[0] == L['logits'].size()[1]              # _dynamo/output_graph.py:339 in init_ambient_guards
+L['logits'].stride()[1] == 1                                  # _dynamo/output_graph.py:339 in init_ambient_guards
+L['logits'].storage_offset() == 0                             # _dynamo/output_graph.py:339 in init_ambient_guards
+L['targets'].size()[0] == L['logits'].size()[0]               # _dynamo/output_graph.py:339 in init_ambient_guards
+L['targets'].stride()[0] == 1                                 # _dynamo/output_graph.py:339 in init_ambient_guards
+L['targets'].storage_offset() == 0                            # _dynamo/output_graph.py:339 in init_ambient_guards
+2 <= L['logits'].size()[0]                                    # _dynamo/output_graph.py:339 in init_ambient_guards
+2 <= L['logits'].size()[1]                                    # _dynamo/output_graph.py:339 in init_ambient_guards
+L['logits'].stride()[1] == 1                                  # _dynamo/output_graph.py:339 in init_ambient_guards
+L['logits'].storage_offset() == 0                             # _dynamo/output_graph.py:339 in init_ambient_guards
+L['targets'].size()[0] == L['logits'].size()[0]               # _dynamo/output_graph.py:339 in init_ambient_guards
+L['targets'].stride()[0] == 1                                 # _dynamo/output_graph.py:339 in init_ambient_guards
+L['targets'].storage_offset() == 0                            # _dynamo/output_graph.py:339 in init_ambient_guards
+2 <= L['logits'].size()[0]                                    # _dynamo/output_graph.py:339 in init_ambient_guards
+2 <= L['logits'].size()[1]                                    # _dynamo/output_graph.py:339 in init_ambient_guards
+Step 1: torchdynamo start tracing loss_fn /scratch/network/OPEN-CATALYST/bench_v0.py:27
+TRACE starts_line loss_fn /scratch/network/OPEN-CATALYST/bench_v0.py:27
+    def loss_fn(logits, targets):
+wrap_to_fake L['logits'] (32768, 128256) [<DimDynamic.STATIC: 2>, <DimDynamic.STATIC: 2>] [None, None]
+wrap_to_fake L['targets'] (32768,) [<DimDynamic.STATIC: 2>] [None]
+TRACE starts_line loss_fn /scratch/network/OPEN-CATALYST/bench_v0.py:28
+        return loss_module(logits, targets)
+TRACE LOAD_GLOBAL loss_module []
+TRACE LOAD_FAST logits [NNModuleVariable()]
+TRACE LOAD_FAST targets [NNModuleVariable(), TensorVariable()]
+TRACE CALL_FUNCTION 2 [NNModuleVariable(), TensorVariable(), TensorVariable()]
+TRACE RETURN_VALUE None [TensorVariable()]
+Step 1: torchdynamo done tracing loss_fn (RETURN_VALUE)
+RETURN_VALUE triggered compile
+COMPILING GRAPH due to GraphCompileReason(reason='return_value', user_stack=[<FrameSummary file /scratch/network/OPEN-CATALYST/bench_v0.py, line 28 in loss_fn>], graph_break=False)
+TRACED GRAPH
+ ===== __compiled_fn_1 =====
+ <eval_with_key>.3 class GraphModule(torch.nn.Module):
+    def forward(self, L_logits_ : torch.Tensor, L_targets_ : torch.Tensor):
+        l_logits_ = L_logits_
+        l_targets_ = L_targets_
+        
+        # File: /scratch/network/OPEN-CATALYST/bench_v0.py:28, code: return loss_module(logits, targets)
+        loss_module = self.loss_module(l_logits_, l_targets_);  l_logits_ = l_targets_ = None
+        return (loss_module,)
+        
+
+TRACED GRAPH
+ __compiled_fn_1 <eval_with_key>.3 opcode       name         target       args                     kwargs
+-----------  -----------  -----------  -----------------------  --------
+placeholder  l_logits_    L_logits_    ()                       {}
+placeholder  l_targets_   L_targets_   ()                       {}
+call_module  loss_module  loss_module  (l_logits_, l_targets_)  {}
+output       output       output       ((loss_module,),)        {}
+
+TRACED GRAPH TENSOR SIZES
+===== __compiled_fn_1 =====
+l_logits_: (32768, 128256)
+l_targets_: (32768,)
+loss_module: (32768,)
+
+Step 2: calling compiler function inductor
+Step 2: done compiler function inductor
+GUARDS:
+hasattr(L['logits'], '_dynamo_dynamic_indices') == False      # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+hasattr(L['targets'], '_dynamo_dynamic_indices') == False     # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+___is_grad_enabled()                                          # _dynamo/output_graph.py:345 in init_ambient_guards
+not ___are_deterministic_algorithms_enabled()                 # _dynamo/output_graph.py:341 in init_ambient_guards
+___is_torch_function_enabled()                                # _dynamo/output_graph.py:349 in init_ambient_guards
+utils_device.CURRENT_DEVICE == None                           # _dynamo/output_graph.py:347 in init_ambient_guards
+___check_obj_id(G['loss_module'], 23393285283264)             # return loss_module(logits, targets)  # bench_v0.py:28 in loss_fn
+G['loss_module'].training == True                             # return loss_module(logits, targets)  # bench_v0.py:28 in loss_fn
+check_tensor(L['logits'], Tensor, DispatchKeySet(CUDA, BackendSelect, ADInplaceOrView, AutogradCUDA), torch.bfloat16, device=0, requires_grad=True, size=[32768, 128256], stride=[128256, 1])  # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
+check_tensor(L['targets'], Tensor, DispatchKeySet(CUDA, BackendSelect, ADInplaceOrView, AutogradCUDA), torch.int64, device=0, requires_grad=False, size=[32768], stride=[1])  # _dynamo/variables/builder.py:1248 in wrap_fx_proxy_cls
